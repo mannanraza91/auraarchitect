@@ -1,64 +1,20 @@
-AI House Design Generator
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-AI House Design Generator is a scalable, AI-driven system for automated generation of residential 2D floor plans and 3D architectural layouts based on user-defined constraints and plot specifications. The platform combines large language models (LLMs), rule-based spatial planning, and structured geometry modeling to produce deterministic, buildable, and optimized house designs.
+# Run and deploy your AI Studio app
 
-Features
+This contains everything you need to run your app locally.
 
-LLM-based requirement parsing for converting unstructured user input into structured design constraints
+View your app in AI Studio: https://ai.studio/apps/a3d2dfa9-2125-4abb-a28f-ca6d7c67b5fc
 
-Constraint-driven layout generation engine ensuring architectural validity
+## Run Locally
 
-Unified 2D and 3D design pipeline with a single source of truth (layout JSON model)
+**Prerequisites:**  Node.js
 
-Detailed dimension mapping including rooms, circulation space, utilities, and structural elements
 
-Intelligent space optimization based on plot size and functional requirements
-
-Optional Vastu-compliant layout adjustments based on directional rules
-
-Extensible export system for generating professional PDF outputs (in progress)
-
-How It Works
-
-User Input → AI Parsing Layer → Constraint Engine → Layout Generation Engine → Geometry Model → 2D Rendering + 3D Visualization
-
-Tech Stack
-
-Frontend: Next.js (SSR-enabled, scalable UI architecture)
-
-Backend: Node.js / Express (modular service-based architecture)
-
-AI Layer: OpenAI + Gemini (hybrid multi-provider with fallback strategy)
-
-3D Rendering: Three.js (WebGL-based real-time visualization)
-
-Database: PostgreSQL / Supabase (structured data and state management)
-
-Installation
-
-npm install
-npm start
-
-Usage
-
-Input plot dimensions or upload plot reference (future CV support)
-
-Define requirements (rooms, parking, utilities, constraints)
-
-Trigger layout generation pipeline
-
-Visualize synchronized 2D floor plan and 3D model
-
-Iterate or export design
-
-Goal
-
-To build a production-grade SaaS platform that automates residential planning through a hybrid AI + rule-based system, delivering fast, accurate, and construction-ready layouts while reducing dependency on manual architectural drafting.
-
-Status
-
-The system is under active development. Core modules including requirement parsing, constraint modeling, and layout generation are functional. Ongoing work includes 3D optimization, PDF export pipeline, and performance scaling.
-
-Author
-
-AI-based architectural design automation system under development as a scalable SaaS product.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
