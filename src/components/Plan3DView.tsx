@@ -45,35 +45,44 @@ function RoomModel({ room, floorLevel }: { room: Room, floorLevel: number }) {
          </Html>
       )}
 
-      {/* Floor */}
+      {/* Translucent Floor */}
       <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[room.width, room.length]} />
-        <meshStandardMaterial color={getRoomColor3D(room.type)} opacity={isSelected ? 0.9 : 0.5} transparent emissive={isSelected ? getRoomColor3D(room.type) : 'black'} emissiveIntensity={isSelected ? 0.5 : 0} />
+        <meshStandardMaterial 
+          color={getRoomColor3D(room.type)} 
+          opacity={isSelected ? 0.85 : 0.55} 
+          transparent 
+          roughness={0.1}
+          metalness={0.2}
+          emissive={isSelected ? getRoomColor3D(room.type) : 'black'} 
+          emissiveIntensity={isSelected ? 0.5 : 0} 
+        />
       </mesh>
       
-      {/* North Wall (Z = -length/2) */}
+      {/* Translucent Walls */}
+      {/* North Wall */}
       <mesh position={[0, WALL_HEIGHT / 2, -room.length / 2]}>
         <boxGeometry args={[room.width, WALL_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#eeeeee" />
-        <Edges scale={1.001} threshold={15} color="#94A3B8" />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.45} roughness={0} metalness={0.1} />
+        <Edges scale={1.001} threshold={15} color={isSelected ? "#0EA5E9" : "#94A3B8"} transparent opacity={0.5} />
       </mesh>
-      {/* South Wall (Z = length/2) */}
+      {/* South Wall */}
       <mesh position={[0, WALL_HEIGHT / 2, room.length / 2]}>
         <boxGeometry args={[room.width, WALL_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#eeeeee" />
-        <Edges scale={1.001} threshold={15} color="#94A3B8" />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.45} roughness={0} metalness={0.1} />
+        <Edges scale={1.001} threshold={15} color={isSelected ? "#0EA5E9" : "#94A3B8"} transparent opacity={0.5} />
       </mesh>
-      {/* West Wall (X = -width/2) */}
+      {/* West Wall */}
       <mesh position={[-room.width / 2, WALL_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, room.length]} />
-        <meshStandardMaterial color="#eeeeee" />
-        <Edges scale={1.001} threshold={15} color="#94A3B8" />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.45} roughness={0} metalness={0.1} />
+        <Edges scale={1.001} threshold={15} color={isSelected ? "#0EA5E9" : "#94A3B8"} transparent opacity={0.5} />
       </mesh>
-      {/* East Wall (X = width/2) */}
+      {/* East Wall */}
       <mesh position={[room.width / 2, WALL_HEIGHT / 2, 0]}>
         <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, room.length]} />
-        <meshStandardMaterial color="#eeeeee" />
-        <Edges scale={1.001} threshold={15} color="#94A3B8" />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.45} roughness={0} metalness={0.1} />
+        <Edges scale={1.001} threshold={15} color={isSelected ? "#0EA5E9" : "#94A3B8"} transparent opacity={0.5} />
       </mesh>
       
       {/* Furniture Procedural Mockups */}
@@ -198,12 +207,12 @@ export function Plan3DView() {
   // We shift by -plotCx and -plotCz to center the model at origin.
 
   return (
-    <div className="w-full h-full bg-transparent overflow-hidden relative cursor-move rounded-[12px]" onClick={() => useAppStore.getState().setSelectedElement(null)}>
+    <div className="w-full h-full bg-transparent overflow-hidden relative cursor-move rounded-[12px]">
       <Canvas camera={{ position: [0, 40, Math.max(plot.width, plot.length)], fov: 50 }} style={{ height: '100%' }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 20, 10]} intensity={1} castShadow />
         
-        <group position={[-plotCx, 0, -plotCz]}>
+        <group position={[-plotCx, 0, -plotCz]} onPointerMissed={() => useAppStore.getState().setSelectedElement(null)}>
           {/* Ground Plane (Plot footprint) */}
           <mesh position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
              <shapeGeometry args={[shape]} />

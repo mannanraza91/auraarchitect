@@ -2,30 +2,99 @@ import React, { useState, useRef } from 'react';
 import { useAppStore } from '../store';
 import { Plan2DView } from './Plan2DView';
 import { Plan3DView } from './Plan3DView';
-import { Download, Edit3, ArrowLeft, Layers, Cuboid, DollarSign, Palette } from 'lucide-react';
+import { BuildingProposalView } from './BuildingProposalView';
+import { Download, Edit3, ArrowLeft, Layers, Cuboid, DollarSign, Palette, FileSpreadsheet } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export function ResultsStep() {
   const { setStep, layout, activeFloor, setActiveFloor, generationTimeMs } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'2d' | '3d'>('2d');
+  const [activeTab, setActiveTab] = useState<'2d' | '3d' | 'proposal'>('2d');
   const printRef = useRef<HTMLDivElement>(null);
+  const proposalRef = useRef<HTMLDivElement>(null);
 
   const handleExportPDF = async () => {
-    if (!printRef.current) return;
+    const targetRef = activeTab === 'proposal' ? proposalRef : printRef;
+    if (!targetRef.current) return;
+    
     try {
-      const canvas = await html2canvas(printRef.current, { scale: 2, backgroundColor: '#0BA1F' });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('Aura_Architect_Blueprint.pdf');
+      if (activeTab === 'proposal') {
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const canvas = await html2canvas(targetRef.current, { 
+          scale: 2, 
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          scrollY: -window.scrollY // Ensure we capture the whole fixed width div
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        // Add the first page
+        doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        heightLeft -= pageHeight;
+        
+        // Add additional pages if content overflows
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+          heightLeft -= pageHeight;
+        }
+        
+        doc.save(`Architect_Proposal_${(Math.random() * 1000).toFixed(0)}.pdf`);
+      } else {
+        // 2D Layout Plan - Professional Centered Single Page
+        const doc = new jsPDF('l', 'pt', 'a4'); // Landscape usually better for plans
+        
+        // Temporarily swap theme to bw for clean export if it's currently dark
+        const canvas = await html2canvas(targetRef.current, { 
+          scale: 3, 
+          backgroundColor: '#ffffff', // Professional white paper background
+          useCORS: true,
+          logging: false
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        
+        // Calculate centered dimensions (keeping aspect ratio, fitting 90% of page)
+        const margin = 40;
+        const maxWidth = pageWidth - (margin * 2);
+        const maxHeight = pageHeight - (margin * 2);
+        
+        const ratio = Math.min(maxWidth / canvas.width, maxHeight / canvas.height);
+        const imgWidth = canvas.width * ratio;
+        const imgHeight = canvas.height * ratio;
+        
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
+        
+        // Add title and branding to the PDF for professionalism
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text("Aura Architect - Technical Layout Plan", pageWidth / 2, 40, { align: 'center' });
+        
+        doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text("Aura Architect by Mannan Raza | Blueprint Series", pageWidth / 2, pageHeight - 30, { align: 'center' });
+        
+        doc.save(`Architectural_Layout_${(Math.random() * 1000).toFixed(0)}.pdf`);
+      }
     } catch (err) {
       console.error("PDF Generation failed", err);
-      alert("Failed to export PDF.");
+      alert("Failed to export professional PDF. Please try again.");
     }
   };
 
@@ -73,8 +142,12 @@ export function ResultsStep() {
 
         {activeTab === '2d' ? (
           <Plan2DView containerRef={printRef} />
-        ) : (
+        ) : activeTab === '3d' ? (
           <Plan3DView />
+        ) : (
+          <div className="w-full h-full overflow-y-auto hidden-scrollbar p-10 bg-[#020617]/50">
+             <BuildingProposalView containerRef={proposalRef} />
+          </div>
         )}
 
         {/* Footer Tools Bar inside canvas */}
@@ -82,24 +155,33 @@ export function ResultsStep() {
           <div className="flex gap-[10px] pointer-events-auto">
             <button 
               onClick={() => setActiveTab('2d')}
-              className={`bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2 transition-colors ${activeTab === '2d' ? 'bg-[#0EA5E9]/30' : ''}`}
+              className={`bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2 transition-colors ${activeTab === '2d' ? 'bg-[#0EA5E9]/30 border-[#0EA5E9]/50' : ''}`}
             >
               2D VIEW
             </button>
             <button 
               onClick={() => setActiveTab('3d')}
-              className={`bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2 transition-colors ${activeTab === '3d' ? 'bg-[#0EA5E9]/30' : ''}`}
+              className={`bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2 transition-colors ${activeTab === '3d' ? 'bg-[#0EA5E9]/30 border-[#0EA5E9]/50' : ''}`}
             >
               <span>3D RENDER</span><span className="bg-[#0EA5E9] py-[2px] px-2 rounded-[4px] text-[9px] uppercase font-[700]">PRO</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('proposal')}
+              className={`bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2 transition-colors ${activeTab === 'proposal' ? 'bg-[#0EA5E9]/30 border-[#0EA5E9]/50' : ''}`}
+            >
+              <FileSpreadsheet className="w-4 h-4" /> FULL PROPOSAL
             </button>
           </div>
           <div className="flex gap-[10px] pointer-events-auto">
             <button className="bg-white/10 backdrop-blur-md border border-white/10 text-white py-2 px-4 rounded-[20px] text-[12px] cursor-pointer flex items-center gap-2" onClick={() => setStep('input')}>
               EDIT REQ
             </button>
-            {activeTab === '2d' && (
-              <button onClick={handleExportPDF} className="bg-white text-[#020617] py-2 px-4 rounded-[20px] text-[12px] font-bold cursor-pointer transition flex items-center hover:bg-gray-200">
-                DOWNLOAD PDF
+            {(activeTab === '2d' || activeTab === 'proposal') && (
+              <button 
+                onClick={handleExportPDF} 
+                className="bg-white text-[#020617] py-2 px-4 rounded-[20px] text-[12px] font-bold cursor-pointer transition flex items-center gap-2 hover:bg-gray-200"
+              >
+                <Download className="w-4 h-4" /> DOWNLOAD {activeTab === 'proposal' ? 'PROPOSAL' : 'PDF'}
               </button>
             )}
           </div>

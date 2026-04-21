@@ -61,6 +61,9 @@ interface AppState {
   unit: 'ft' | 'm';
   requirements: string;
   isVastuCompliant: boolean;
+  northDirection: 'North' | 'South' | 'East' | 'West';
+  roadPositions: ('front' | 'back' | 'left' | 'right')[];
+  hasCommercialSpace: boolean;
   layout: LayoutPlan | null;
   error: string | null;
 
@@ -75,6 +78,9 @@ interface AppState {
   setFloorsCount: (count: number) => void;
   setRequirements: (req: string) => void;
   setVastuCompliant: (isCompliant: boolean) => void;
+  setNorthDirection: (dir: AppState['northDirection']) => void;
+  setRoadPositions: (roads: AppState['roadPositions']) => void;
+  setCommercialSpace: (hasCommercial: boolean) => void;
   setLayout: (layout: LayoutPlan, timeMs: number) => void;
   setError: (err: string | null) => void;
   setSelectedElement: (element: { type: 'room' | 'door', id: string, floorLevel: number } | null) => void;
@@ -94,6 +100,9 @@ export const useAppStore = create<AppState>((set) => ({
   unit: 'ft',
   requirements: 'I want a modern multi-floor house setup with a smart living room, aesthetic bedroom, and modern kitchen.',
   isVastuCompliant: true,
+  northDirection: 'North',
+  roadPositions: ['front'],
+  hasCommercialSpace: false,
   layout: null,
   error: null,
   selectedElement: null,
@@ -107,6 +116,9 @@ export const useAppStore = create<AppState>((set) => ({
   setFloorsCount: (floorsCount) => set({ floorsCount }),
   setRequirements: (requirements) => set({ requirements }),
   setVastuCompliant: (isVastuCompliant) => set({ isVastuCompliant }),
+  setNorthDirection: (northDirection) => set({ northDirection }),
+  setRoadPositions: (roadPositions) => set({ roadPositions }),
+  setCommercialSpace: (hasCommercialSpace) => set({ hasCommercialSpace }),
   setLayout: (layout, timeMs) => set({ layout, generationTimeMs: timeMs }),
   setError: (error) => set({ error }),
   setSelectedElement: (selectedElement) => set({ selectedElement }),

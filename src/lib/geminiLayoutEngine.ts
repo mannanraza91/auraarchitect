@@ -92,37 +92,44 @@ export async function generateHouseLayout(
   unit: string,
   floorsCount: number,
   requirements: string,
-  vastu: boolean
+  vastu: boolean,
+  northDirection: string,
+  roadPositions: string[],
+  hasCommercial: boolean
 ): Promise<LayoutPlan> {
   const prompt = `
-You are a Principal Software Architect & Master Indian Architect.
-We are building a production-grade house design SaaS called "Aura Architect".
-Your task is to generate a fully personalized 2D floor plan JSON spanning ${floorsCount} floors.
+You are a Principal Lead Architect & Master Planner. You are NOT just a layout generator; you are a PROFESSIONAL ARCHITECT.
+Your task is to generate a technically sound, buildable, and highly functional 2D floor plan JSON spanning ${floorsCount} floors for the SaaS "Aura Architect".
 
-Plot Characteristics:
-- Shape Type: ${plotShape.toUpperCase()} (Front Width: ${width}${unit}, Back Width: ${backWidth}${unit}, Total Length: ${length}${unit})
-- Max Bounding Width: ${Math.max(width, backWidth)}
-- Max Bounding Length: ${length}
+Site Context (Foundation):
+- Plot Shape: ${plotShape.toUpperCase()} (Front Width: ${width}${unit}, Back Width: ${backWidth}${unit}, Total Length: ${length}${unit})
+- Orientation: The plot's NORTH direction is facing ${northDirection}.
+- Road Access: Road(s) are located at: ${roadPositions.join(', ')}.
+- Use Case: ${hasCommercial ? 'Mixed Use (Commercial Ground/Entry + Residential)' : 'Residential Only'}.
 
-User Requirements:
+User Vision:
 "${requirements}"
 
-Vastu Compliant: ${vastu ? 'YES' : 'NO'}
+Professional Architectural Principles (The 13 Pillars):
+1. SITE UNDERSTANDING: Prioritize road orientation and North-based sunlight.
+2. SPACE PLANNING: Logic zones (Public vs Private).
+3. PRACTICAL DIMENSIONS: No "unusable" tiny rooms. Bedrooms min 10x12ft. Kitchens min 8x10ft.
+4. VENTILATION: Every habitable room MUST have outside facing windows.
+5. STRUCTURAL FEASIBILITY: Align major walls vertically across all levels.
+6. CIRCULATION: Smooth paths; ZERO dead ends.
+7. PARKING & ENTRY: Clear vehicle access.
+8. ORIENTATION (Vastu: ${vastu ? 'STRICT' : 'OPTIONAL'}): Master Bed SW, Kitchen SE, etc.
+9. OPTIMIZATION: Maximize usable carpet area.
+10. BYE-LAWS: Enforce setbacks (3-5ft if plot > 1500 sq ft).
+11. AESTHETICS: Geometric balance.
+12. SERVICES: Stacking plumbing zones.
+13. FUTURE EXPANSION: Logical stair placement.
 
-CRITICAL INSTRUCTIONS:
-1. Plot Outline & Shape: If the plot is UNEVEN (trapezoid), provide the exact 'outline' array in the 'plot' object representing the 4 corners: [{x:0, y:0}, {x:${width}, y:0}, {x:${width - (width-backWidth)/2}, y:${length}}, {x:${(width-backWidth)/2}, y:${length}}]. Adjust x-coordinates if aligned differently by user requirements. All rooms MUST fit strictly inside this polygon boundary.
-2. Space Allocation: Provide exactly ${floorsCount} entries in the "floors" array. (Level 0 = Ground, 1 = First, etc).
-3. Do NOT overlap any rooms! The \`(x, y)\` is the bottom-left corner of the room.
-4. Interlayer Alignment: If building multiple floors, include a 'circulation' room for stairs. The stairs MUST occupy the EXACT same x, y, width, length coordinates on every floor.
-5. Provide realistic dimensions for rooms. Ensure ground floor has parking if required.
-6. Alignment Engine: Ensure a logical flow from Entrance/Gate -> Living/Hall -> Rooms. Avoid long empty corridors.
-7. Vastu Engine (If YES): 
-   - Entrance typically North or East.
-   - Kitchen typically South-East.
-   - Master Bedroom typically South-West.
-   - Bathrooms typically North-West or South.
-8. Doors: Provide realistic doors.
-9. Interior Design Module: The schema requires an 'interior' object for EVERY room containing explicit style names, realistic hex code color palettes, and descriptive layout ideas with furniture (e.g., tv, sofa, slab, counters, etc.).
+CRITICAL: Interior Design must be "PROPER FUNCTIONING".
+For each room, the 'interior.description' MUST explicitly detail:
+1. DIMENSION: Exact size relevance for its purpose.
+2. WORKING: How people move and work in the space (e.g., kitchen work triangle, bedroom circulation).
+3. PURPOSE: The primary and secondary usage of the space.
 
 Output strictly robust, valid, and minified JSON conforming perfectly to the schema.
 `;
