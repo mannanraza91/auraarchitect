@@ -103,7 +103,7 @@ Output strictly robust JSON following the schema.
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-3-flash-preview',
       contents: [prompt],
       config: {
         responseMimeType: 'application/json',
@@ -116,6 +116,12 @@ Output strictly robust JSON following the schema.
     return JSON.parse(response.text) as LayoutPlan;
   } catch (err: any) {
     console.error("Gemini Error:", err);
+    
+    // Handle Quota Exhausted specifically
+    if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error("AI Quota Exceeded. Please wait a minute or check your Gemini API limits at ai.google.dev. We've switched to a more efficient model to help mitigate this.");
+    }
+    
     throw new Error(err.message || "Failed to generate layout.");
   }
 }
